@@ -28,9 +28,9 @@ class ForumModel extends Nette\Object {
         /*$forums = $this->database->query('SELECT f.*,
                                                 t.changed,
                                                 COUNT(t.id) AS topics
-                                         FROM ' . $this->dbPrefix . 'forums f
+                                         FROM forums f
                                          LEFT JOIN (SELECT * 
-                                                    FROM ' . $this->dbPrefix . 'topics
+                                                    FROM topics
                                                     ORDER BY changed DESC) t ON t.forum_id=f.id
                                          GROUP BY f.id
                                          ORDER BY root_id, f.order');*/
