@@ -114,7 +114,7 @@ class Hierarchy extends \Nette\Object {
      * Generate array of node IDs as path to node
      * Lazy tree building.
      * @param int $id
-     * @return array of IDs
+     * @return array
      */    
     public function getPathTo($id) {
 
