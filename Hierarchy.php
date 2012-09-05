@@ -19,7 +19,7 @@ class Hierarchy extends \Nette\Object {
     private $maxLevel = 0;
     private $treeIterator = 0;
 
-    function __construct(array $data, $nodeClass = 'HierarchyNode') {
+    function __construct(\Nette\Database\Statement $data, $nodeClass = 'HierarchyNode') {
         $this->data = $data;
         $this->nodeClass = $nodeClass;
     }
@@ -67,7 +67,6 @@ class Hierarchy extends \Nette\Object {
             $count++;
         }
 
-
         if ($count > $this->maxLevel) {
             // first tree making
             $this->maxLevel = $count;
@@ -103,11 +102,8 @@ class Hierarchy extends \Nette\Object {
      * @return HierarchyNode
      */
     public function findNode($id) {
-        if (empty($this->tree)) {
-            $this->makeTree();
-        }
 
-        foreach ($this->tree AS $child) {
+        foreach ($this->getTree() AS $child) {
             if ($result = $child->findChild($id)) {
                 return $result;
             }
@@ -121,12 +117,9 @@ class Hierarchy extends \Nette\Object {
      * @return array of IDs
      */    
     public function getPathTo($id) {
-        if (empty($this->tree)) {
-            $this->makeTree();
-        }
 
-        foreach ($this->tree AS $node) {
-            $path = array($node->id);
+        foreach ($this->getTree() AS $node) {
+            $path = array($node);
 
             if ($output = $node->getPathTo($id)) {
                 

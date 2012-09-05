@@ -17,10 +17,10 @@ class HierarchyNode implements IHierarchyNode {
     public $rootId = NULL;
     public $children = NULL;
 
-    function __construct($info) {
-        $this->id = $info->id;
-        $this->name = $info->name;
-        $this->rootId = $info->root_id;
+    function __construct(\Nette\Database\Row $data) {
+        $this->id = $data->id;
+        $this->name = $data->name;
+        $this->rootId = $data->root_id;
     }
 
     /**
@@ -76,17 +76,17 @@ class HierarchyNode implements IHierarchyNode {
     /**
      * Generate array of node IDs as path to node
      * @param int $id
-     * @return array of IDs
+     * @return array of Nodes
      */     
     public function getPathTo($id) {
         $path = false;
 
         if ($id == $this->id) {
-            $path[] = $this->id;
+            $path[] = $this;
         } elseif ($this->children != NULL) {
             if (isset($this->children[$id])) {
-                $path[] = $this->id;
-                $path[] = $this->children[$id]->id;
+                $path[] = $this;
+                $path[] = $this->children[$id];
             } else {
                 foreach ($this->children AS $child) {
                     if ($result = $child->getPathTo($id)) {

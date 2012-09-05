@@ -24,7 +24,12 @@ class ForumModel extends Nette\Object {
      * @return Hierarchy 
      */
     public function getForums() {
-        $forums = $this->database->table('forums')->order('root_id'); // No need to be ordered but it's faster
+
+        $forums = $this->database->query('SELECT *
+                                          FROM forums
+                                          ORDER BY root_id'); // No need to be ordered but it's faster
+            
+                                         
         /*$forums = $this->database->query('SELECT f.*,
                                                 t.changed,
                                                 COUNT(t.id) AS topics
@@ -33,7 +38,7 @@ class ForumModel extends Nette\Object {
                                                     FROM topics
                                                     ORDER BY changed DESC) t ON t.forum_id=f.id
                                          GROUP BY f.id
-                                         ORDER BY root_id, f.order');*/
+                                         ORDER BY root_id, f.order'); */
 
         return new Tree\Hierarchy($forums, 'ForumNode');
     }
