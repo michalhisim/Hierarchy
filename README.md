@@ -4,6 +4,8 @@ Nette Hierarchy
 Usage
 -----
 
+Nette forum model
+
 ``` php
 use \Nette\Diagnostics\Debugger,
     \Nette\Database\Connection;
@@ -19,10 +21,10 @@ class ForumModel extends Nette\Object {
 
     /**
      * Load forums from database.
-     * @return ("tree") array or NULL 
+     * @return Hierarchy 
      */
     public function getForums() {
-        $forums = $this->database->table('forums');
+        $forums = $this->database->table('forums')->order('root_id'); // No need to be ordered but it's faster
 
         return new Hierarchy($forums, 'ForumNode');
     }
