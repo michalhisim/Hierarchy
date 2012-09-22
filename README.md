@@ -44,17 +44,4 @@ class ForumModel extends Nette\Object {
     }
 }
 
-class ForumNode extends HierarchyNode {
-
-    public $topics = NULL;
-    public $changed = NULL;
-
-    function __construct($info) {
-
-        parent::__construct($info);
-
-        $this->topics = $info->topics;
-        $this->changed = $info->changed;
-    }
-}
 ```
