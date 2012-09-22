@@ -7,7 +7,6 @@ namespace Tree;
  *
  * @copyright Copyright (c) 2012 Michal Šimon
  */
-
 use \Nette\Diagnostics\Debugger;
 
 class Hierarchy extends \Nette\Object {
@@ -81,7 +80,7 @@ class Hierarchy extends \Nette\Object {
 
         return $this->tree;
     }
-    
+
     /**
      * Tree getter
      * Lazy tree building.
@@ -94,7 +93,37 @@ class Hierarchy extends \Nette\Object {
 
         return $this->tree;
     }
-    
+
+    /**
+     * Tree list getter
+     * Lazy tree building.
+     * @return tree array 
+     */
+    public function getList($tree = NULL) { // todo pomalé
+
+        if ($tree == NULL) {
+            $tree = $this->getTree();
+        }
+
+        $list = array();
+
+        foreach ($tree as $node) {
+
+            $list[$node->id] = $node;
+            if (isset($node->children)) {
+                
+                $result = $this->getList($node->children); // pomocí array_merge() se rozhází poředí
+                
+                foreach($result AS $child)
+                {
+                    $list[$child->id] = $child;
+                }
+            }
+        }
+
+        return $list;
+    }
+
     /**
      * Searching in tree
      * Lazy tree building.
@@ -115,14 +144,14 @@ class Hierarchy extends \Nette\Object {
      * Lazy tree building.
      * @param int $id
      * @return array
-     */    
+     */
     public function getPathTo($id) {
 
         foreach ($this->getTree() AS $node) {
             $path = array($node);
 
             if ($output = $node->getPathTo($id)) {
-                
+
                 $path = array_merge($path, $output);
 
                 return $path;

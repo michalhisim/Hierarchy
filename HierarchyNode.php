@@ -14,12 +14,14 @@ class HierarchyNode implements IHierarchyNode {
 
     public $id = NULL;
     public $name = NULL;
+    public $level = NULL;
     public $rootId = NULL;
     public $children = NULL;
 
     function __construct(\Nette\Database\Row $data) {
         $this->id = $data->id;
         $this->name = $data->name;
+        $this->level = 0;
         $this->rootId = $data->root_id;
     }
 
@@ -31,6 +33,8 @@ class HierarchyNode implements IHierarchyNode {
     public function addChild(IHierarchyNode $child) {
 
         if ($child->rootId == $this->id) {
+            $child->level = $this->level+1;
+            
             $this->children[$child->id] = $child;
 
             return true;
