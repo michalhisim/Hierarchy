@@ -5,9 +5,8 @@ namespace Tree;
 /**
  * Nette Hierarchy
  *
- * @copyright Copyright (c) 2012 Michal Å imon
+ * @copyright Copyright (c) 2012 Michal Šimon
  */
-
 use \Nette\Diagnostics\Debugger;
 
 class HierarchyNode implements IHierarchyNode {
@@ -29,12 +28,12 @@ class HierarchyNode implements IHierarchyNode {
      * Adding a subnode
      * @param HierarchyNode $child
      * @return bool
-     */     
+     */
     public function addChild(IHierarchyNode $child) {
 
         if ($child->rootId == $this->id) {
-            $child->level = $this->level+1;
-            
+            $child->level = $this->level + 1;
+
             $this->children[$child->id] = $child;
 
             return true;
@@ -58,7 +57,7 @@ class HierarchyNode implements IHierarchyNode {
      * Searching in tree
      * @param int $id
      * @return HierarchyNode or false
-     */    
+     */
     public function findChild($id) {
         if ($id == $this->id) {
             return $this;
@@ -81,7 +80,7 @@ class HierarchyNode implements IHierarchyNode {
      * Generate array of node IDs as path to node
      * @param int $id
      * @return array of Nodes
-     */     
+     */
     public function getPathTo($id) {
         $path = false;
 
@@ -102,4 +101,29 @@ class HierarchyNode implements IHierarchyNode {
 
         return $path;
     }
+
+    /**
+     * Generate array of all sub node IDs
+     * @param int $id
+     * @return array of ids
+     */
+    public function getSubIds() {
+
+        $ids = array($this->id);
+
+        if ($this->children) {
+            $result = array();
+
+            foreach ($this->children AS $node) {
+                $result = array_merge($result, $node->getSubIds());
+            }
+        }
+
+        if (isset($result)) {
+            $ids = array_merge($ids, $result);
+        }
+
+        return array_unique($ids);
+    }
+
 }
