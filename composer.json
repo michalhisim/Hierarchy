@@ -1,0 +1,13 @@
+{
+  "name": "michalhisim/Hierarchy",
+	"description": "Tree data hierarchy",
+	"authors": [
+		{
+			"name": "Michal Šimon",
+			"homepage": "http://hisim.cz"
+		}
+	],
+  "require": {
+		"nette/nette": "2.0.*"
+  }
+}
