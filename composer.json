@@ -1,6 +1,7 @@
 {
 	"name": "michalhisim/hierarchy",
 	"description": "Tree data hierarchy",
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Michal Šimon",
