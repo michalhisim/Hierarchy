@@ -9,170 +9,121 @@ namespace Tree;
  */
 use \Nette\Diagnostics\Debugger;
 
-class Hierarchy extends \Nette\Object {
+class HierarchyNode implements IHierarchyNode {
 
-    protected $data = NULL;
-    protected $notSet = array();
-    protected $tree = array();
-    protected $nodeClass = 'HierarchyNode';
-    protected $maxLevel = 0;
-    protected $treeIterator = 0;
+    public $id = NULL;
+    public $name = NULL;
+    public $level = NULL;
+    public $rootId = NULL;
+    public $children = NULL;
 
-    function __construct(\Nette\Database\Statement $data, $nodeClass = 'HierarchyNode') {
-        $this->data = $data;
-        $this->nodeClass = $nodeClass;
+    function __construct(\Nette\Database\Row $data) {
+        $this->id = $data->id;
+        $this->name = $data->name;
+        $this->level = 0;
+        $this->rootId = $data->root_id;
     }
 
     /**
-     * Build a tree from data "table".
-     * @return tree array 
+     * Adding a subnode
+     * @param HierarchyNode $child
+     * @return bool
      */
-    protected function makeTree($data = NULL) {
-        $list = NULL;
+    public function addChild(IHierarchyNode $child) {
 
-        if ($data != NULL) {
-            $list = $data;
+        if ($child->rootId == $this->id) {
+            $child->level = $this->level + 1;
+
+            $this->children[$child->id] = $child;
+
+            return true;
         } else {
-            $list = $this->data;
-        }
+            //Not my child -> delegate
 
-        $count = 0;
+            if ($this->children != NULL) {
+                foreach ($this->children AS $nodeRow) {
 
-        foreach ($list AS $row) {
-            $node = new $this->nodeClass($row);
-
-            if ($node->rootId == 0) {
-                // Level 0
-                $this->tree[$node->id] = $node;
-            } elseif (isset($this->tree[$node->rootId])) {
-                // Level 1
-                $this->tree[$node->rootId]->addChild($node);
-            } else {
-                // SubLevels
-                $added = false;
-
-                foreach ($this->tree AS $nodeRow) {
-                    if ($nodeRow->addChild($node)) {
-                        $added = true;
-                        break;
+                    if ($nodeRow->addChild($child)) {
+                        return true;
                     }
                 }
-
-                if ($added == false) {
-                    $this->notSet[] = $row;
-                }
             }
 
-            $count++;
+            return false;
         }
-
-        if ($count > $this->maxLevel) {
-            // first tree making
-            $this->maxLevel = $count;
-            $this->treeIterator++;
-        }
-
-        if (!empty($this->notSet) AND ($this->treeIterator <= $this->maxLevel)) {
-            $this->makeTree($this->notSet); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
-
-            $this->treeIterator++;
-        }
-
-        return $this->tree;
-    }
-
-    /**
-     * Tree getter
-     * Lazy tree building.
-     * @return tree array 
-     */
-    public function getTree() {
-        if (empty($this->tree)) {
-            $this->makeTree();
-        }
-
-        return $this->tree;
-    }
-
-    /**
-     * Tree list getter
-     * Lazy tree building.
-     * @return tree array 
-     */
-    public function getList($tree = NULL) { // todo pomalé
-
-        if ($tree == NULL) {
-            $tree = $this->getTree();
-        }
-
-        $list = array();
-
-        foreach ($tree as $node) {
-
-            $list[$node->id] = $node;
-            if (isset($node->children)) {
-                
-                $result = $this->getList($node->children); // pomocí array_merge() se rozhází poředí
-                
-                foreach($result AS $child)
-                {
-                    $list[$child->id] = $child;
-                }
-            }
-        }
-
-        return $list;
     }
 
     /**
      * Searching in tree
-     * Lazy tree building.
      * @param int $id
-     * @return HierarchyNode
+     * @return HierarchyNode or false
      */
-    public function findNode($id) {
-
-        foreach ($this->getTree() AS $child) {
-            if ($result = $child->findChild($id)) {
-                return $result;
+    public function findChild($id) {
+        if ($id == $this->id) {
+            return $this;
+        } elseif ($this->children != NULL) {
+            if (isset($this->children[$id])) {
+                return $this->children[$id];
+            } else {
+                foreach ($this->children AS $child) {
+                    if ($result = $child->findChild($id)) {
+                        return $result;
+                    }
+                }
             }
         }
-        
-        return False;
+
+        return false;
     }
 
     /**
      * Generate array of node IDs as path to node
-     * Lazy tree building.
      * @param int $id
-     * @return array
+     * @return array of Nodes
      */
     public function getPathTo($id) {
+        $path = false;
 
-        foreach ($this->getTree() AS $node) {
-            $path = array($node);
+        if ($id == $this->id) {
+            $path[] = $this;
+        } elseif ($this->children != NULL) {
+            if (isset($this->children[$id])) {
+                $path[] = $this;
+                $path[] = $this->children[$id];
+            } else {
+                foreach ($this->children AS $child) {
+                    if ($result = $child->getPathTo($id)) {
+                        return $result;
+                    }
+                }
+            }
+        }
 
-            if ($output = $node->getPathTo($id)) {
+        return $path;
+    }
 
-                $path = array_merge($path, $output);
+    /**
+     * Generate array of all sub node IDs
+     * @param int $id
+     * @return array of ids
+     */
+    public function getSubIds() {
 
-                return $path;
+        $ids = array($this->id);
+
+        if ($this->children) {
+            $result = array();
+            
+            foreach ($this->children AS $node) {
+                $result = array_merge($result, $node->getSubIds());
             }
         }
         
-        return False;
-    }
-    
-    /**
-     * Generate list of subNodes IDs
-     * Lazy tree building.
-     * @param int $id Node ID
-     * @return array 
-     */
-    public function getSubIds($id) {
-        $node = $this->findNode($id);
-        
-        return $node->getSubIds();
+        if (isset($result)) {
+            $ids = array_merge($ids, $result);
+        }
+
+        return array_unique($ids);
     }
 
 }

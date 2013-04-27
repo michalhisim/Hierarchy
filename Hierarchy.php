@@ -11,12 +11,12 @@ use \Nette\Diagnostics\Debugger;
 
 class Hierarchy extends \Nette\Object {
 
-    private $data = NULL;
-    private $unset = array();
-    private $tree = array();
-    private $nodeClass = 'HierarchyNode';
-    private $maxLevel = 0;
-    private $treeIterator = 0;
+    protected $data = NULL;
+    protected $notSet = array();
+    protected $tree = array();
+    protected $nodeClass = 'HierarchyNode';
+    protected $maxLevel = 0;
+    protected $treeIterator = 0;
 
     function __construct(\Nette\Database\Statement $data, $nodeClass = 'HierarchyNode') {
         $this->data = $data;
@@ -59,7 +59,7 @@ class Hierarchy extends \Nette\Object {
                 }
 
                 if ($added == false) {
-                    $this->unset[] = $row;
+                    $this->notSet[] = $row;
                 }
             }
 
@@ -72,8 +72,8 @@ class Hierarchy extends \Nette\Object {
             $this->treeIterator++;
         }
 
-        if (!empty($this->unset) AND ($this->treeIterator <= $this->maxLevel)) {
-            $this->makeTree($this->unset); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
+        if (!empty($this->notSet) AND ($this->treeIterator <= $this->maxLevel)) {
+            $this->makeTree($this->notSet); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
 
             $this->treeIterator++;
         }
@@ -137,6 +137,8 @@ class Hierarchy extends \Nette\Object {
                 return $result;
             }
         }
+        
+        return False;
     }
 
     /**
@@ -157,6 +159,20 @@ class Hierarchy extends \Nette\Object {
                 return $path;
             }
         }
+        
+        return False;
+    }
+    
+    /**
+     * Generate list of subNodes IDs
+     * Lazy tree building.
+     * @param int $id Node ID
+     * @return array 
+     */
+    public function getSubIds($id) {
+        $node = $this->findNode($id);
+        
+        return $node->getSubIds();
     }
 
 }
