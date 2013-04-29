@@ -7,7 +7,6 @@ namespace Tree;
  *
  * @copyright Copyright (c) 2012 Michal Šimon
  */
-
 use \Nette\Diagnostics\Debugger;
 
 class CatNode extends HierarchyNode {
@@ -26,17 +25,44 @@ class CatNode extends HierarchyNode {
         $this->id = $info->cat_id;
         $this->visible = $info->visible;
     }
-    
+
+    /**
+     * Get visible chidren
+     * @param bool $visibilityFilter
+     * @return array
+     */
+    public function getCildren($visibilityFilter = true) {
+        if ($this->children != NULL) {
+            if ($visibilityFilter) {
+                $result = array();
+
+                foreach ($this->children AS $key => $child) {
+                    if (!$child->visible) {
+                        continue;
+                    }
+
+                    $result[$key] = $child;
+                }
+
+                return $result;
+            }
+
+            return $this->children;
+        }
+
+        return array();
+    }
+
     /**
      * Adding a subnode
      * @param HierarchyNode $child
      * @return bool
-     */     
+     */
     public function addChild(IHierarchyNode $child) {
 
         if ($child->rootId == $this->id) {
-            $child->level = $this->level+1;
-            
+            $child->level = $this->level + 1;
+
             $this->children[$child->alias] = $child;
 
             return true;
