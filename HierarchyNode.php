@@ -21,7 +21,7 @@ class HierarchyNode implements IHierarchyNode {
         $this->id = $data->id;
         $this->name = $data->name;
         $this->level = 0;
-        $this->rootId = $data->root_id;
+        $this->rootId = (int) $data->root_id;
     }
 
     /**
