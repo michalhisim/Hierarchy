@@ -36,31 +36,13 @@ class Hierarchy extends \Nette\Object {
             $list = $this->data;
         }
 
-        $count = 0;
-
+        $count = 0;       
+        
         foreach ($list AS $row) {
             $node = new $this->nodeClass($row);
 
-            if ($node->rootId == 0) {
-                // Level 0
-                $this->tree[$node->id] = $node;
-            } elseif (isset($this->tree[$node->rootId])) {
-                // Level 1
-                $this->tree[$node->rootId]->addChild($node);
-            } else {
-                // SubLevels
-                $added = false;
-
-                foreach ($this->tree AS $nodeRow) {
-                    if ($nodeRow->addChild($node)) {
-                        $added = true;
-                        break;
-                    }
-                }
-
-                if ($added == false) {
-                    $this->notSet[] = $row;
-                }
+            if (!$this->addChild($node)) {
+                $this->notSet[] = $row;
             }
 
             $count++;
@@ -73,9 +55,9 @@ class Hierarchy extends \Nette\Object {
         }
 
         if (!empty($this->notSet) AND ($this->treeIterator <= $this->maxLevel)) {
-            $this->makeTree($this->notSet); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
-
             $this->treeIterator++;
+            
+            $this->makeTree($this->notSet); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
         }
 
         return $this->tree;
@@ -100,7 +82,6 @@ class Hierarchy extends \Nette\Object {
      * @return tree array 
      */
     public function getList($tree = NULL) { // todo pomalé
-
         if ($tree == NULL) {
             $tree = $this->getTree();
         }
@@ -111,11 +92,10 @@ class Hierarchy extends \Nette\Object {
 
             $list[$node->id] = $node;
             if (isset($node->children)) {
-                
+
                 $result = $this->getList($node->children); // pomocí array_merge() se rozhází poředí
-                
-                foreach($result AS $child)
-                {
+
+                foreach ($result AS $child) {
                     $list[$child->id] = $child;
                 }
             }
@@ -137,7 +117,7 @@ class Hierarchy extends \Nette\Object {
                 return $result;
             }
         }
-        
+
         return False;
     }
 
@@ -159,10 +139,10 @@ class Hierarchy extends \Nette\Object {
                 return $path;
             }
         }
-        
+
         return False;
     }
-    
+
     /**
      * Generate list of subNodes IDs
      * Lazy tree building.
@@ -171,8 +151,70 @@ class Hierarchy extends \Nette\Object {
      */
     public function getSubIds($id) {
         $node = $this->findNode($id);
-        
+
         return $node->getSubIds();
+    }
+
+    /**
+     * 
+     * @param int $nodeId
+     * @param Tree\Hierarchy|false $nodes
+     * @return array
+     */
+    public function findLink($nodeId, $nodes = false) {
+        $url = array();
+
+        if (!$nodes) {
+            $nodes = $this->getTree();
+        }
+
+        foreach ($nodes AS $node) {
+
+            if ($node->id == $nodeId) {
+                $url = array_merge($url, array($node->alias));
+
+                break;
+            } else {
+                if (!empty($node->children)) {
+                    $result = $this->findLink($nodeId, $node->children);
+
+                    if ($result) {
+                        $url[] = $node->alias;
+
+                        $url = array_merge($url, $result);
+                    }
+                }
+            }
+        }
+
+        return $url;
+    }
+
+    /**
+     * Add child to tree
+     * @param \Tree\HierarchyNode $node
+     * @return bool
+     */
+    public function addChild(HierarchyNode $node) {
+        if ($node->rootId == 0) {
+            // Level 0
+            $this->tree[$node->id] = $node;
+        } elseif (isset($this->tree[$node->rootId])) {
+            // Level 1
+            $this->tree[$node->rootId]->addChild($node);
+        } else {
+            // SubLevels
+
+            foreach ($this->tree AS $nodeRow) {
+                if ($nodeRow->addChild($node)) {
+                    break;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
 }
