@@ -9,19 +9,43 @@ namespace Tree;
  */
 use \Nette\Diagnostics\Debugger;
 
-class HierarchyNode implements IHierarchyNode {
+class HierarchyNode extends \Nette\Object implements IHierarchyNode {
 
-    public $id = NULL;
-    public $name = NULL;
-    public $level = NULL;
-    public $rootId = NULL;
-    public $children = NULL;
+    protected $id = NULL;
+    protected $name = NULL;
+    protected $level = NULL;
+    protected $rootId = NULL;
+    protected $children = NULL;
 
     function __construct(\Nette\Database\Row $data) {
         $this->id = $data->id;
         $this->name = $data->name;
         $this->level = 0;
         $this->rootId = (int) $data->root_id;
+    }
+    
+    public function getId(){
+        return $this->id;
+    }
+    
+    public function getName(){
+        return $this->name;
+    }
+    
+    public function getLevel(){
+        return $this->level;
+    }
+    
+    public function setLevel($level){
+        $this->level = intval($level);
+    }
+    
+    public function getRootId(){
+        return $this->rootId;
+    }
+    
+    public function getChildren(){
+        return $this->children;
     }
 
     /**
