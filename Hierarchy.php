@@ -36,8 +36,8 @@ class Hierarchy extends \Nette\Object {
             $list = $this->data;
         }
 
-        $count = 0;       
-        
+        $count = 0;
+
         foreach ($list AS $row) {
             $node = new $this->nodeClass($row);
 
@@ -56,7 +56,7 @@ class Hierarchy extends \Nette\Object {
 
         if (!empty($this->notSet) AND ($this->treeIterator <= $this->maxLevel)) {
             $this->treeIterator++;
-            
+
             $this->makeTree($this->notSet); // todo Kontrola logiky, zda se nemůže rekurze zacyklit
         }
 
@@ -91,7 +91,7 @@ class Hierarchy extends \Nette\Object {
         foreach ($tree as $node) {
 
             $list[$node->id] = $node;
-            if (isset($node->children)) {
+            if ($node->children != NULL) {
 
                 $result = $this->getList($node->children); // pomocí array_merge() se rozhází poředí
 
