@@ -79,7 +79,7 @@ class CatHierarchy extends \Tree\Hierarchy {
         }
 
         foreach ($cats AS $cat) {
-            if ($cat->type == \ProductModel::CAT_TYPE_SUPER) {
+            if ($cat->type == \Model\ProductModel::CAT_TYPE_SUPER) {
                 if (!empty($cat->children)) {
 
                     if ($result = $this->findLink($catId, $cat->children)) {
