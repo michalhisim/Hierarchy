@@ -18,7 +18,7 @@ class Hierarchy extends \Nette\Object {
     protected $maxLevel = 0;
     protected $treeIterator = 0;
 
-    function __construct(\Nette\Database\Statement $data, $nodeClass = 'HierarchyNode') {
+    function __construct(\Nette\Database\ResultSet $data, $nodeClass = 'HierarchyNode') {
         $this->data = $data;
         $this->nodeClass = $nodeClass;
     }
