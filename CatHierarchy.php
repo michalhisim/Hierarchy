@@ -11,7 +11,7 @@ use \Nette\Diagnostics\Debugger;
 
 class CatHierarchy extends \Tree\Hierarchy {
 
-    function __construct(\Nette\Database\Statement $data) {
+    function __construct(\Nette\Database\ResultSet $data) {
         $this->data = $data;
         $this->nodeClass = '\Tree\CatNode';
     }
