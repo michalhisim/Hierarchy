@@ -9,6 +9,6 @@
 		}
 	],
 	"require": {
-		"nette/nette": "2.*"
+		"nette/nette": "2.0.*"
 	}
 }
